@@ -5,14 +5,14 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <sstream>
+#include <fmt/format.h>
 
 namespace {
 	struct chunk {
 		sf::Uint32 style_flags = sf::Text::Regular;
 		sf::Color color = sf::Color::White;
+		bool start_of_new_line = false;
 		sf::String text;
-		bool ends_in_newline = false;
 	};
 
 	std::map<sf::String, sf::Color> _colors = { //
@@ -72,70 +72,52 @@ namespace sfe {
 
 		std::vector<chunk> chunks{{}};
 
-		chunk* current_chunk = &(chunks.front());
-		bool escaped = false;
-
 		for (auto it = source.begin(); it != source.end(); ++it) {
-			auto new_chunk = [&] {
-				chunks.push_back(chunk{chunks.back().style_flags, chunks.back().color});
-				current_chunk = &chunks.back();
-			};
-
-			auto new_formatted_chunk = [&](sf::Text::Style style) {
-				if (escaped) {
-					current_chunk->text += *it;
-					escaped = false;
-					return;
-				}
+			auto push_formatted_chunk = [&](sf::Text::Style style) {
 				chunks.push_back(chunk{chunks.back().style_flags ^ style, chunks.back().color});
-				current_chunk = &chunks.back();
 			};
 
 			switch (*it) {
 				case '~':
-					new_formatted_chunk(sf::Text::Italic);
+					push_formatted_chunk(sf::Text::Italic);
 					break;
 				case '*':
-					new_formatted_chunk(sf::Text::Bold);
+					push_formatted_chunk(sf::Text::Bold);
 					break;
 				case '_':
-					new_formatted_chunk(sf::Text::Underlined);
+					push_formatted_chunk(sf::Text::Underlined);
 					break;
 				case '#': { // Color
-					if (escaped) {
-						current_chunk->text += *it;
-						escaped = false;
-						break;
-					}
 					auto color_end = std::find_if(it + 1, source.end(), [](auto c) { return isspace(c); });
-					new_chunk();
 					// A properly formatted hex string is safely convertible to ANSI.
-					current_chunk->color = color_from_string(sf::String::fromUtf32(it + 1, color_end).toAnsiString());
+					auto const color = color_from_string(sf::String::fromUtf32(it + 1, color_end).toAnsiString());
+					chunks.push_back(chunk{chunks.back().style_flags, color});
 					it = color_end;
 					break;
 				}
-				case '\\': // Escape sequence for escaping formatting characters
-					if (it != source.end()) {
-						switch (*(it + 1)) {
-							case '~':
-							case '*':
-							case '_':
-							case '#':
-								escaped = true;
-								break;
-							default:
-								break;
-						}
+				case '\\': // Escape sequence
+					++it;
+					if (it == source.end()) {
+						throw std::domain_error{"Expected formatting control character after '\\'."};
 					}
-					if (!escaped) { current_chunk->text += *it; }
+					switch (*it) {
+						case '~':
+						case '*':
+						case '_':
+						case '#':
+						case '\\':
+							chunks.back().text += *it;
+							break;
+						default:
+							throw std::domain_error{
+								fmt::format("Cannot escape non-control character '{}'.", static_cast<char>(*it))};
+					}
 					break;
-				case '\n': // Make a new chunk in the case of a newline.
-					current_chunk->ends_in_newline = true;
-					new_chunk();
+				case '\n': // New line
+					chunks.push_back(chunk{chunks.back().style_flags, chunks.back().color, true});
 					break;
 				default:
-					escaped = false;
-					current_chunk->text += *it;
+					chunks.back().text += *it;
 					break;
 			}
 		}
@@ -143,9 +125,8 @@ namespace sfe {
 		// Build string from source, stripped of formatting characters.
 		_string.clear();
 		for (auto const& chunk : chunks) {
-			if (chunk.ends_in_newline || !chunk.text.isEmpty()) {
-				_string += chunk.text + (chunk.ends_in_newline ? "\n" : "");
-			}
+			if (chunk.start_of_new_line) { _string += '\n'; }
+			if (!chunk.text.isEmpty()) { _string += chunk.text; }
 		}
 
 		// Used to compute bounds and character positions of actual texts
@@ -153,7 +134,6 @@ namespace sfe {
 		_bounds = text.getLocalBounds();
 
 		std::size_t cursor = 0;
-		chunk const* last_chunk = nullptr;
 		for (auto const& chunk : chunks) {
 			sf::Text t;
 			t.setFillColor(chunk.color);
@@ -165,14 +145,13 @@ namespace sfe {
 
 			t.setPosition(text.findCharacterPos(cursor));
 
-			if (last_chunk != nullptr && last_chunk->ends_in_newline) {
+			if (chunk.start_of_new_line) {
 				t.setPosition(0, t.getPosition().y + _font->getLineSpacing(_character_size));
 				++cursor;
 			}
 
 			_texts.push_back(t);
 			cursor += chunk.text.getSize();
-			last_chunk = &chunk;
 		}
 	}
 
