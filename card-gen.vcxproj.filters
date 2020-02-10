@@ -17,5 +17,16 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\rich_text.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\visitation.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rich_text.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
