@@ -116,7 +116,7 @@ struct card {
 
 auto main(int argc, char* argv[]) -> int {
 	if (argc != 3) {
-		fmt::print("Usage: card-gen wefoiauwhef input-filename output-filename\n");
+		fmt::print("Usage: card-gen input-filename output-filename\n");
 		return 0;
 	}
 
