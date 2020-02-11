@@ -11,8 +11,11 @@ namespace {
 	struct chunk {
 		sf::Uint32 style_flags = sf::Text::Regular;
 		sf::Color color = sf::Color::White;
-		bool start_of_new_line = false;
 		sf::String text;
+	};
+
+	struct line {
+		std::vector<chunk> chunks;
 	};
 
 	std::map<sf::String, sf::Color> _colors = { //
@@ -70,29 +73,34 @@ namespace sfe {
 
 		clear();
 
-		std::vector<chunk> chunks{{}};
+		std::vector<line> lines{line{{chunk{}}}};
+
+		sf::Uint32 current_style_flags = sf::Text::Regular;
+		sf::Color current_color = sf::Color::White;
 
 		for (auto it = source.begin(); it != source.end(); ++it) {
-			auto push_formatted_chunk = [&](sf::Text::Style style) {
-				chunks.push_back(chunk{chunks.back().style_flags ^ style, chunks.back().color});
-			};
-
 			switch (*it) {
 				case '~':
-					push_formatted_chunk(sf::Text::Italic);
+					current_style_flags ^= sf::Text::Italic;
+					lines.back().chunks.push_back(chunk{current_style_flags, current_color});
 					break;
 				case '*':
-					push_formatted_chunk(sf::Text::Bold);
+					current_style_flags ^= sf::Text::Bold;
+					lines.back().chunks.push_back(chunk{current_style_flags, current_color});
 					break;
 				case '_':
-					push_formatted_chunk(sf::Text::Underlined);
+					current_style_flags ^= sf::Text::Underlined;
+					lines.back().chunks.push_back(chunk{current_style_flags, current_color});
 					break;
 				case '#': { // Color
+					// Find the end of the color string.
 					auto color_end = std::find_if(it + 1, source.end(), [](auto c) { return isspace(c); });
-					// A properly formatted hex string is safely convertible to ANSI.
-					auto const color = color_from_string(sf::String::fromUtf32(it + 1, color_end).toAnsiString());
-					chunks.push_back(chunk{chunks.back().style_flags, color});
+					// Convert string to color. A properly formatted hex string is safely convertible to ANSI.
+					current_color = color_from_string(sf::String::fromUtf32(it + 1, color_end).toAnsiString());
+					// Advance the iterator past the color string.
 					it = color_end;
+
+					lines.back().chunks.push_back(chunk{current_style_flags, current_color});
 					break;
 				}
 				case '\\': // Escape sequence
@@ -106,7 +114,7 @@ namespace sfe {
 						case '_':
 						case '#':
 						case '\\':
-							chunks.back().text += *it;
+							lines.back().chunks.back().text += *it;
 							break;
 						default:
 							throw std::domain_error{
@@ -114,44 +122,40 @@ namespace sfe {
 					}
 					break;
 				case '\n': // New line
-					chunks.push_back(chunk{chunks.back().style_flags, chunks.back().color, true});
+					lines.push_back(line{{chunk{}}});
 					break;
 				default:
-					chunks.back().text += *it;
+					lines.back().chunks.back().text += *it;
 					break;
 			}
 		}
 
-		// Build string from source, stripped of formatting characters.
-		_string.clear();
-		for (auto const& chunk : chunks) {
-			if (chunk.start_of_new_line) { _string += '\n'; }
-			if (!chunk.text.isEmpty()) { _string += chunk.text; }
-		}
-
-		// Used to compute bounds and character positions of actual texts
-		sf::Text text{_string, *_font, _character_size};
-		_bounds = text.getLocalBounds();
-
-		std::size_t cursor = 0;
-		for (auto const& chunk : chunks) {
-			sf::Text t;
-			t.setFillColor(chunk.color);
-			t.setString(chunk.text);
-			t.setStyle(chunk.style_flags);
-			t.setCharacterSize(_character_size);
-
-			t.setFont(*_font);
-
-			t.setPosition(text.findCharacterPos(cursor));
-
-			if (chunk.start_of_new_line) {
-				t.setPosition(0, t.getPosition().y + _font->getLineSpacing(_character_size));
-				++cursor;
+		// Build texts and formatting-stripped string and compute bounds.
+		sf::Vector2f next_position{};
+		_bounds = {0, 0, 0, 0};
+		for (auto const& line : lines) {
+			for (auto const& chunk : line.chunks) {
+				// Construct text.
+				_texts.push_back({chunk.text, *_font, _character_size});
+				_texts.back().setFillColor(chunk.color);
+				_texts.back().setStyle(chunk.style_flags);
+				_texts.back().setPosition(next_position);
+				// Move next position to the end of the text.
+				next_position = _texts.back().findCharacterPos(chunk.text.getSize());
+				// Add chunk's text to the string.
+				_string += chunk.text;
+				// Extend bounds.
+				auto const text_bounds = _texts.back().getGlobalBounds();
+				auto const right = text_bounds.left + text_bounds.width;
+				_bounds.width = std::max(_bounds.width, right - _bounds.left);
+				auto const bottom = text_bounds.top + text_bounds.height;
+				_bounds.height = std::max(_bounds.height, bottom - _bounds.top);
 			}
-
-			_texts.push_back(t);
-			cursor += chunk.text.getSize();
+			if (&line != &lines.back()) {
+				// Handle new lines.
+				next_position = {0, next_position.y + _font->getLineSpacing(_character_size)};
+				_string += '\n';
+			}
 		}
 	}
 
