@@ -19,12 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\card-gen\detail\rich_text.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\rich_text.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\rich_text.hpp" />
-    <ClInclude Include="src\visitation.hpp" />
+    <ClInclude Include="include\card-gen\card-gen.hpp" />
+    <ClInclude Include="include\card-gen\detail\rich_text.hpp" />
+    <ClInclude Include="include\card-gen\detail\visitation.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

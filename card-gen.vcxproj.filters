@@ -1,32 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{6b4def3f-295d-4478-a6c5-be566bbe8abb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{f5756fb7-21f4-4ddd-aaf2-1acbd88f15c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\card-gen">
+      <UniqueIdentifier>{be2c937d-de68-40f9-8a82-2f2cbc67d21d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\card-gen\detail">
+      <UniqueIdentifier>{4abb23c5-6d72-4136-80fe-e0805fbea066}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\rich_text.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="include\card-gen\detail\rich_text.cpp">
+      <Filter>include\card-gen\detail</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\visitation.hpp">
-      <Filter>src</Filter>
+    <ClInclude Include="include\card-gen\card-gen.hpp">
+      <Filter>include\card-gen</Filter>
     </ClInclude>
-    <ClInclude Include="src\rich_text.hpp">
-      <Filter>src</Filter>
+    <ClInclude Include="include\card-gen\detail\rich_text.hpp">
+      <Filter>include\card-gen\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\card-gen\detail\visitation.hpp">
+      <Filter>include\card-gen\detail</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
