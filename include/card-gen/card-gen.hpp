@@ -18,6 +18,8 @@ namespace cg {
 		std::string font;
 		unsigned size;
 
+		text(sf::String markup, std::string font, unsigned size) : markup{markup}, font{font}, size{size} {}
+
 		text(nlohmann::json const& j)
 			: markup{j.at("markup").get<std::string>()}, font{j.at("font")}, size{j.at("size")} {}
 	};
@@ -25,6 +27,8 @@ namespace cg {
 	struct image {
 		std::string path;
 		sf::Vector2f size;
+
+		image(std::string path, sf::Vector2f size = {1, 1}) : path{path}, size{size} {}
 
 		image(nlohmann::json const& j) : path{j.at("path").get<std::string>()} {
 			auto size_it = j.find("size");
@@ -41,6 +45,8 @@ namespace cg {
 	struct card {
 		sf::Vector2i size;
 		std::vector<element> elements;
+
+		card(sf::Vector2i size) : size{size} {}
 
 		card(nlohmann::json const& j) {
 			// Get card size.

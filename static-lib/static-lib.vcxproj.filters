@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\include\card-gen\detail\rich_text.cpp">
+      <Filter>include\card-gen\detail</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\card-gen\detail\rich_text.hpp">
+      <Filter>include\card-gen\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\card-gen\detail\visitation.hpp">
+      <Filter>include\card-gen\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\card-gen\card-gen.hpp">
+      <Filter>include\card-gen</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{ce885a49-290e-4e76-a056-5702568c9096}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\card-gen">
+      <UniqueIdentifier>{fd472f69-d887-4127-b0db-b6035b3e02e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\card-gen\detail">
+      <UniqueIdentifier>{505bfb10-0632-49df-8667-0b60bdb862fd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
