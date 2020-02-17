@@ -9,7 +9,6 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/System/String.hpp>
 
-#include <map>
 #include <vector>
 
 namespace sfe {
@@ -21,18 +20,14 @@ namespace sfe {
 		static auto add_color(sf::String const& name, sf::Color const& color) -> void;
 		static auto add_color(sf::String const& name, unsigned argb_hex) -> void;
 
-		rich_text(sf::String const& source, sf::Font const& font, unsigned character_size = 30);
+		rich_text(sf::String const& source, unsigned character_size = 30);
 
-		auto get_string() const -> sf::String;
 		auto get_source() const -> sf::String;
-		auto set_string(sf::String const& source) -> void;
+		auto set_source(sf::String const& source) -> void;
 		auto clear() -> void;
 
 		auto get_character_size() const -> unsigned;
 		auto set_character_size(unsigned size) -> void;
-
-		auto get_font() const -> sf::Font const*;
-		auto set_font(sf::Font const& font) -> void;
 
 		auto get_local_bounds() const -> sf::FloatRect;
 		auto get_global_bounds() const -> sf::FloatRect;
@@ -43,11 +38,8 @@ namespace sfe {
 		std::vector<sf::Text> _texts;
 
 		unsigned _character_size;
-		sf::Font const* _font;
 
 		sf::String _source;
-		sf::String _string;
 		sf::FloatRect _bounds;
 	};
-
 }

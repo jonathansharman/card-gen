@@ -1,0 +1,32 @@
+{
+	"size": [500, 500],
+	"elements": [
+		{
+			"image": {
+				"path": "test/background.png"
+			}
+		},
+		{
+			"text": {
+				"markup": "[font test/firamono.ttf][outline-thickness 1][outline-color blue]_This has an outline and [outline-thickness 3]underline.",
+				"size": 24
+			}
+		},
+		{
+			"pos": [0.5, 0.5],
+			"origin": [0.5, 0.5],
+			"text": {
+				"markup": "[outline-color white][font test/firamono.ttf]~\\\\This~/ is /[fill-color green]in [fill-color white]_the_[fill-color blue]~ middle\n\n[align right]with a ~[outline-thickness 1]_newline_",
+				"size": 24
+			}
+		},
+		{
+			"pos": [1, 1],
+			"origin": [1, 1],
+			"text": {
+				"markup": "[font test/firamono.ttf][fill-color blue]Blue [fill-color white]*bold* bottom[fill-color ff0000]-right",
+				"size": 24
+			}
+		}
+	]
+}

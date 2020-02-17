@@ -15,13 +15,11 @@
 namespace cg {
 	struct text {
 		sf::String markup;
-		std::string font;
 		unsigned size;
 
-		text(sf::String markup, std::string font, unsigned size) : markup{markup}, font{font}, size{size} {}
+		text(sf::String markup, std::string font, unsigned size) : markup{markup}, size{size} {}
 
-		text(nlohmann::json const& j)
-			: markup{j.at("markup").get<std::string>()}, font{j.at("font")}, size{j.at("size")} {}
+		text(nlohmann::json const& j) : markup{j.at("markup").get<std::string>()}, size{j.at("size")} {}
 	};
 
 	struct image {
@@ -37,9 +35,9 @@ namespace cg {
 	};
 
 	struct element {
-		sf::Vector2f pos;
-		sf::Vector2f origin;
 		std::variant<text, image> text_or_image;
+		sf::Vector2f pos{0, 0};
+		sf::Vector2f origin{0, 0};
 	};
 
 	struct card {
@@ -78,7 +76,7 @@ namespace cg {
 					}
 				}();
 
-				elements.push_back({pos, origin, text_or_image});
+				elements.push_back({text_or_image, pos, origin});
 			}
 		}
 
@@ -88,27 +86,29 @@ namespace cg {
 			card_texture.clear();
 
 			for (auto const& element : elements) {
+				sf::Vector2f const rounded_pos{std::roundf(size.x * element.pos.x), std::roundf(size.y * element.pos.y)};
 				match(
 					element.text_or_image,
 					[&](text t) {
-						sf::Font font;
-						font.loadFromFile(t.font);
-						sfe::rich_text rich_text{t.markup, font, t.size};
-						rich_text.setPosition(size.x * element.pos.x, size.y * element.pos.y);
+						sfe::rich_text rich_text{t.markup, t.size};
+						rich_text.setPosition(rounded_pos);
 						auto const bounds = rich_text.get_local_bounds();
-						rich_text.setOrigin(bounds.width * element.origin.x, bounds.height * element.origin.y);
+						rich_text.setOrigin( //
+							std::roundf(bounds.width * element.origin.x),
+							std::roundf(bounds.height * element.origin.y));
 						card_texture.draw(rich_text);
 					},
 					[&](image i) {
 						sf::Texture image_texture;
 						image_texture.loadFromFile(i.path);
 						sf::Sprite image_sprite{image_texture};
-						image_sprite.setPosition(size.x * element.pos.x, size.y * element.pos.y);
+						image_sprite.setPosition(rounded_pos);
 						auto const image_texture_size = image_texture.getSize();
 						image_sprite.setScale(
 							i.size.x * size.x / image_texture_size.x, i.size.y * size.y / image_texture_size.y);
-						image_sprite.setOrigin(
-							image_texture_size.x * element.origin.x, image_texture_size.y * element.origin.y);
+						image_sprite.setOrigin( //
+							std::roundf(image_texture_size.x * element.origin.x),
+							std::roundf(image_texture_size.y * element.origin.y));
 						card_texture.draw(image_sprite);
 					});
 			}
